@@ -22,7 +22,7 @@ const cfg = {
     enableCloudPainting: true,
     showPath: false,
     showCircles: false,
-    showCloudPaths: true,
+    showCloudPaths: false,
     breakWhenPossible: false,
 };
 
@@ -85,7 +85,6 @@ async function redrawFullScene() {
                 vertex(p.x, p.y);
             }
             endShape();
-            return;
         }
         return;
     }
