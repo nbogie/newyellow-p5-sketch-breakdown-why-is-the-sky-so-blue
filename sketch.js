@@ -226,30 +226,6 @@ async function setup() {
     }
 }
 
-function noiseStroke(_x, _y, _maxHeight, _length) {
-    let lineCount = _length * lineDensity;
-
-    for (let i = 0; i < lineCount; i++) {
-        let t = i / lineCount;
-
-        let xPos = _x + t * _length;
-        let yPos = _y;
-
-        let noiseScaler = 1;
-
-        if (t <= 0.1) noiseScaler = map(t, 0, 0.1, 0, 1);
-        else if (t >= 0.9) noiseScaler = map(t, 0.9, 1, 1, 0);
-
-        let noiseValue =
-            noise(xPos * noiseScaleX, yPos * noiseScaleY) * noiseScaler;
-
-        let yAddUp = noiseValue * _maxHeight * 0.7;
-        let yAddBot = noiseValue * _maxHeight * 0.3;
-
-        NYLine(xPos, yPos - yAddUp, xPos, yPos + yAddBot);
-    }
-}
-
 function draw() {}
 
 async function NYRect(_x, _y, _width, _height) {
