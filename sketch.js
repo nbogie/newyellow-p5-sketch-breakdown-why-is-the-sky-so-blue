@@ -1,3 +1,7 @@
+import { sleep } from "./animUtils.js";
+import { getAngle } from "./CircleData.js";
+import { makeCloudPaths } from "./cloudPaths.js";
+
 const cfg = {
     lineWaveNoiseScale: 0.02,
     lineWavingLength: 3,
@@ -21,7 +25,7 @@ async function setup() {
     cfg.myColour = color(15, 71, 140);
 
     // background
-    let padding = 0.06 * min(width, height);
+    const padding = 0.06 * min(width, height);
 
     cfg.dotDensity = random(0.5, 0.8);
     cfg.lineDensity = random(0.06, 0.2);
@@ -35,33 +39,7 @@ async function setup() {
 
     cfg.dotSize = [1, 3];
 
-    // make paths into paths[]
-    let paths = [];
-    let pathCount = floor(random(6, 20));
-    let pathDist = (height * 0.6) / pathCount;
-
-    for (let i = 0; i < pathCount; i++) {
-        let x1 = -padding;
-        let y1 = 0.4 * height + i * pathDist;
-
-        let x2 = width + padding;
-        let y2 = y1;
-
-        let pathNoise = random(0.001, 0.003);
-        let pathHeight = random(0.1, 0.4) * height;
-        paths[i] = await getNoisePath(x1, y1, x2, y2, pathNoise, pathHeight);
-    }
-
-    let cloudPaths = [];
-
-    // get cloud paths into cloudPaths[]
-    for (let i = 0; i < paths.length; i++) {
-        let lv1Circles = await getCircleQueue(paths[i], 30, 240);
-        let lv1Path = await getCircleWalkPath(lv1Circles, 1);
-
-        let lv2Circles = await getCircleQueue(lv1Path, 10, 60);
-        cloudPaths[i] = await getCircleWalkPath(lv2Circles, 1);
-    }
+    const { paths, cloudPaths } = await makeCloudPaths(padding);
 
     // paint cloud lines from cloudPaths[]
     for (let p = 0; p < cloudPaths.length; p++) {
@@ -311,6 +289,5 @@ function NoisePoint(_x, _y, _scaler = 1) {
     circle(_x, _y + offsetY, nowDotSize * _scaler);
 }
 
-function sleep(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-}
+window.setup = setup;
+window.draw = draw;

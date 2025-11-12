@@ -1,4 +1,4 @@
-class CircleData {
+export class CircleData {
     constructor(_x, _y, _radius) {
         this.x = _x;
         this.y = _y;
@@ -58,7 +58,7 @@ class CircleData {
 }
 
 // calculate degree
-function getAngle(_x1, _y1, _x2 = null, _y2 = null) {
+export function getAngle(_x1, _y1, _x2 = null, _y2 = null) {
     if (_x2 == null && _y2 == null) {
         // the first two parameters are point
         let p1x = _x1.x;

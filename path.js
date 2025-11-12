@@ -1,8 +1,15 @@
+import { sleep } from "./animUtils.js";
+import { CircleData, getAngle } from "./CircleData.js";
+
 let SHOW_PATH = true;
 let SHOW_CIRCLES = true;
 
 // get circles on the path
-async function getCircleQueue(_pathPoints, _minSize = 10, _maxSize = 60) {
+export async function getCircleQueue(
+    _pathPoints,
+    _minSize = 10,
+    _maxSize = 60
+) {
     let resultCircles = [];
 
     let pathIndex = 0;
@@ -131,7 +138,7 @@ async function getCircleQueue(_pathPoints, _minSize = 10, _maxSize = 60) {
 }
 
 // get the path on the circles
-async function getCircleWalkPath(_circles, _walkSpeed = 1) {
+export async function getCircleWalkPath(_circles, _walkSpeed = 1) {
     // draw on the edge of circles
     let nowCircleIndex = 0;
     let nowWalkingAngle = -90;
@@ -206,7 +213,14 @@ async function getCircleWalkPath(_circles, _walkSpeed = 1) {
     return resultPathData;
 }
 
-async function getNoisePath(_x1, _y1, _x2, _y2, _noiseScale, _wavingHeight) {
+export async function getNoisePath(
+    _x1,
+    _y1,
+    _x2,
+    _y2,
+    _noiseScale,
+    _wavingHeight
+) {
     let walkDir = getAngle(_x1, _y1, _x2, _y2) + 90;
     let walkCount = dist(_x1, _y1, _x2, _y2);
 
