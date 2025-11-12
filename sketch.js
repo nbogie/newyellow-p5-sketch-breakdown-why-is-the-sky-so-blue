@@ -1,35 +1,40 @@
-let lineWaveNoiseScale = 0.02;
-let lineWavingLength = 3;
+const cfg = {
+    lineWaveNoiseScale: 0.02,
+    lineWavingLength: 3,
+    lineThickness: 6,
+    lineDensity: 0.15,
+    lineSizeNoiseScale: 0.02,
+    dotDensity: 0.8,
+    dotSize: [1, 3],
+    myColour: undefined,
+    pointNoiseScaleX: 0.06,
+    pointNoiseScaleY: 0.003,
+    pointNoiseRadius: 3,
+};
 
-let lineThickness = 6;
-let lineDensity = 0.15;
-
-let lineSizeNoiseScale = 0.02;
-let dotDensity = 0.8;
-let dotSize = [1, 3];
-
-let myColour;
+//this is not config, it is state which changes during the animated render process
+let pointNoiseX = 0;
 
 async function setup() {
     createCanvas(windowWidth, windowHeight);
     background(240);
 
-    myColour = color(15, 71, 140);
+    cfg.myColour = color(15, 71, 140);
 
     // background
     let padding = 0.06 * min(width, height);
 
-    dotDensity = random(0.5, 0.8);
-    lineDensity = random(0.06, 0.2);
-    lineWaveNoiseScale = random(0.02, 0.12);
-    dotSize = [1, 3];
+    cfg.dotDensity = random(0.5, 0.8);
+    cfg.lineDensity = random(0.06, 0.2);
+    cfg.lineWaveNoiseScale = random(0.02, 0.12);
+    cfg.dotSize = [1, 3];
     await NYRect(padding, padding, width - padding * 2, height - padding * 2);
 
     // top frame
-    dotSize = [0, 6];
+    cfg.dotSize = [0, 6];
     NYLine(padding, padding, width - padding, padding);
 
-    dotSize = [1, 3];
+    cfg.dotSize = [1, 3];
 
     // make paths
     let paths = [];
@@ -100,8 +105,8 @@ async function setup() {
                 if (shadeT < 0.2) shadeScaler = shadeT / 0.2;
 
                 noStroke();
-                myColour.setAlpha(255 * random(0.4, 0.8));
-                fill(myColour);
+                cfg.myColour.setAlpha(255 * random(0.4, 0.8));
+                fill(cfg.myColour);
                 NoisePoint(x1, y1, shadeScaler);
 
                 if (i % 20 == 0) await sleep(1);
@@ -113,7 +118,7 @@ async function setup() {
         let cloudPaddingNX = random(-1000, 1000);
         let cloudPaddingNScale = 0.03;
         // let cloudLineSpacing = floor(random(6, 18));
-        let cloudLineSpacing = floor(1.0 / lineDensity);
+        let cloudLineSpacing = floor(1.0 / cfg.lineDensity);
 
         if (p == paths.length - 1) break;
 
@@ -141,12 +146,12 @@ async function setup() {
     }
 
     // frame
-    dotSize = [0, 6];
+    cfg.dotSize = [0, 6];
     NYLine(padding, padding, padding, height - padding);
     NYLine(width - padding, padding, width - padding, height - padding);
     NYLine(padding, height - padding, width - padding, height - padding);
 
-    dotSize = [1, 3];
+    cfg.dotSize = [1, 3];
 
     // draw last cloud white
     let nowPath = cloudPaths[cloudPaths.length - 1];
@@ -188,8 +193,8 @@ async function setup() {
             if (shadeT < 0.2) shadeScaler = shadeT / 0.2;
 
             noStroke();
-            myColour.setAlpha(255 * random(0.4, 0.8));
-            fill(myColour);
+            cfg.myColour.setAlpha(255 * random(0.4, 0.8));
+            fill(cfg.myColour);
             NoisePoint(x1, y1, shadeScaler);
 
             if (i % 20 == 0) await sleep(1);
@@ -201,7 +206,7 @@ async function setup() {
     let cloudPaddingNX = random(-1000, 1000);
     let cloudPaddingNScale = 0.03;
     // let cloudLineSpacing = floor(random(6, 18));
-    let cloudLineSpacing = floor(1.0 / lineDensity);
+    let cloudLineSpacing = floor(1.0 / cfg.lineDensity);
 
     for (let i = 0; i < nowPath.length; i++) {
         let x1 = nowPath[i].x;
@@ -229,7 +234,7 @@ async function setup() {
 function draw() {}
 
 async function NYRect(_x, _y, _width, _height) {
-    let xLines = _width * lineDensity;
+    let xLines = _width * cfg.lineDensity;
     let xLineSpace = _width / (xLines - 1);
 
     for (let x = 0; x < xLines; x++) {
@@ -245,7 +250,7 @@ async function NYRect(_x, _y, _width, _height) {
 }
 
 function NYLine(_x1, _y1, _x2, _y2) {
-    let dotCount = dist(_x1, _y1, _x2, _y2) * dotDensity;
+    let dotCount = dist(_x1, _y1, _x2, _y2) * cfg.dotDensity;
     let stepDistance = dist(_x1, _y1, _x2, _y2) / dotCount;
 
     let forwardAngle = getAngle(_x1, _y1, _x2, _y2);
@@ -256,46 +261,41 @@ function NYLine(_x1, _y1, _x2, _y2) {
         let yPos = lerp(_y1, _y2, t);
 
         let sizeNoise = noise(
-            xPos * lineSizeNoiseScale,
-            yPos * lineSizeNoiseScale,
+            xPos * cfg.lineSizeNoiseScale,
+            yPos * cfg.lineSizeNoiseScale,
             666
         );
         let waveNoise = noise(
-            xPos * lineWaveNoiseScale,
-            yPos * lineWaveNoiseScale,
+            xPos * cfg.lineWaveNoiseScale,
+            yPos * cfg.lineWaveNoiseScale,
             999
         );
 
-        let nowDotSize = lerp(dotSize[0], dotSize[1], sizeNoise);
+        let nowDotSize = lerp(cfg.dotSize[0], cfg.dotSize[1], sizeNoise);
 
         // let wavingNoise = noise(xPos * 0.01, yPos * 0.01, 999) * 2 - 1;
-        xPos += sin(radians(forwardAngle)) * lineWavingLength * waveNoise;
-        yPos -= cos(radians(forwardAngle)) * lineWavingLength * waveNoise;
+        xPos += sin(radians(forwardAngle)) * cfg.lineWavingLength * waveNoise;
+        yPos -= cos(radians(forwardAngle)) * cfg.lineWavingLength * waveNoise;
 
-        strokeWeight(lineThickness);
-        myColour.setAlpha(255 * random(0.3, 0.6));
-        fill(myColour);
+        strokeWeight(cfg.lineThickness);
+        cfg.myColour.setAlpha(255 * random(0.3, 0.6));
+        fill(cfg.myColour);
         noStroke();
 
         circle(xPos, yPos, nowDotSize);
     }
 }
 
-let pointNoiseX = 0;
-let pointNoiseScaleX = 0.06;
-let pointNoiseScaleY = 0.003;
-let pointNoiseRadius = 3;
-
 function NoisePoint(_x, _y, _scaler = 1) {
-    pointNoiseX += pointNoiseScaleX;
-    let offsetY = (noise(pointNoiseX) - 0.5) * 2 * pointNoiseRadius;
+    pointNoiseX += cfg.pointNoiseScaleX;
+    let offsetY = (noise(pointNoiseX) - 0.5) * 2 * cfg.pointNoiseRadius;
 
     let sizeNoise = noise(
-        _x * lineSizeNoiseScale,
-        _y * lineSizeNoiseScale,
+        _x * cfg.lineSizeNoiseScale,
+        _y * cfg.lineSizeNoiseScale,
         666
     );
-    let nowDotSize = lerp(dotSize[0], dotSize[1], sizeNoise);
+    let nowDotSize = lerp(cfg.dotSize[0], cfg.dotSize[1], sizeNoise);
 
     circle(_x, _y + offsetY, nowDotSize * _scaler);
 }
