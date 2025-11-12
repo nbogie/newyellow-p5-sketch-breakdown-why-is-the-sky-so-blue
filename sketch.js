@@ -1,8 +1,8 @@
 import { sleep } from "./animUtils.js";
 import { getAngle } from "./CircleData.js";
-import { makeCloudPaths } from "./cloudPaths.js";
 //@ts-ignore
 import { GUI } from "https://unpkg.com/dat.gui@0.7.9/build/dat.gui.module.js";
+import { makeCloudPaths } from "./path.js";
 
 /**
  * @typedef {import("./path.js").PointPath} PointPath
@@ -105,8 +105,7 @@ async function redrawFullScene() {
     NYNoisyLine(padding, height - padding, width - padding, height - padding);
 
     cfg.dotSize = [1, 3];
-
-    // draw last cloud white
+    // draw the last cloud white, probably overlapping the frame
     let nowPath = cloudPaths[cloudPaths.length - 1];
 
     // fill cloud path
