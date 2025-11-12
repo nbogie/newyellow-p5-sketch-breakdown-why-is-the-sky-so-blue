@@ -1,7 +1,8 @@
 import { sleep } from "./animUtils.js";
 import { getAngle } from "./CircleData.js";
 import { makeCloudPaths } from "./cloudPaths.js";
-
+//@ts-ignore
+import { GUI } from "https://unpkg.com/dat.gui@0.7.9/build/dat.gui.module.js";
 const cfg = {
     lineWaveNoiseScale: 0.02,
     lineWavingLength: 3,
@@ -13,15 +14,27 @@ const cfg = {
     myColour: undefined,
     pointNoiseScaleX: 0.06,
     pointNoiseRadius: 3,
+    enableCloudLines: true,
 };
 
 //this is not config, it is state which changes during the animated render process
 let pointNoiseX = 0;
+let gui;
+
+function setupGUI() {
+    gui = new GUI();
+    gui.add(cfg, "enableCloudLines");
+    gui.add(cfg, "lineWavingLength");
+}
 
 async function setup() {
     createCanvas(windowWidth, windowHeight);
-    background(240);
+    setupGUI();
+    await redrawScene();
+}
 
+async function redrawScene() {
+    background(240);
     cfg.myColour = color(15, 71, 140);
 
     // background
@@ -41,7 +54,9 @@ async function setup() {
 
     const { paths, cloudPaths } = await makeCloudPaths(padding);
 
-    await paintCloudLinesFromCloudPaths(cloudPaths, paths, padding);
+    if (cfg.enableCloudLines) {
+        await paintCloudLinesFromCloudPaths(cloudPaths, paths, padding);
+    }
 
     // frame
     cfg.dotSize = [0, 6];
@@ -138,9 +153,6 @@ async function setup() {
         if (i % 200) await sleep(1);
     }
 }
-
-function draw() {}
-
 async function NYRect(_x, _y, _width, _height) {
     let xLines = _width * cfg.lineDensity;
     let xLineSpace = _width / (xLines - 1);
@@ -210,7 +222,7 @@ function NoisePoint(_x, _y, _scaler = 1) {
 //@ts-ignore
 window.setup = setup;
 //@ts-ignore
-window.draw = draw;
+window.draw = () => {};
 async function paintCloudLinesFromCloudPaths(cloudPaths, paths, padding) {
     for (let p = 0; p < cloudPaths.length; p++) {
         /** the current cloudPath being painted */
@@ -295,3 +307,9 @@ async function paintCloudLinesFromCloudPaths(cloudPaths, paths, padding) {
         }
     }
 }
+
+window.keyPressed = function () {
+    if (key === "r") {
+        redrawScene();
+    }
+};
