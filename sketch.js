@@ -35,7 +35,7 @@ async function setup() {
 
     cfg.dotSize = [1, 3];
 
-    // make paths
+    // make paths into paths[]
     let paths = [];
     let pathCount = floor(random(6, 20));
     let pathDist = (height * 0.6) / pathCount;
@@ -54,7 +54,7 @@ async function setup() {
 
     let cloudPaths = [];
 
-    // get cloud paths
+    // get cloud paths into cloudPaths[]
     for (let i = 0; i < paths.length; i++) {
         let lv1Circles = await getCircleQueue(paths[i], 30, 240);
         let lv1Path = await getCircleWalkPath(lv1Circles, 1);
@@ -63,8 +63,9 @@ async function setup() {
         cloudPaths[i] = await getCircleWalkPath(lv2Circles, 1);
     }
 
-    // paint cloud lines
+    // paint cloud lines from cloudPaths[]
     for (let p = 0; p < cloudPaths.length; p++) {
+        /** the current cloudPath being painted */
         let nowPath = cloudPaths[p];
 
         // fill cloud path
@@ -86,6 +87,7 @@ async function setup() {
         let shadeNScale = random(0.003, 0.02);
         let shadeChance = random(0.6, 0.8);
 
+        //always, for first cloudPath
         if (p == 0) shadeChance = 1;
 
         for (let i = 0; i < nowPath.length; i++) {
@@ -119,6 +121,7 @@ async function setup() {
         // let cloudLineSpacing = floor(random(6, 18));
         let cloudLineSpacing = floor(1.0 / cfg.lineDensity);
 
+        //don't do what comes after for last cloudPath
         if (p == paths.length - 1) break;
 
         for (let i = 0; i < nowPath.length; i++) {
