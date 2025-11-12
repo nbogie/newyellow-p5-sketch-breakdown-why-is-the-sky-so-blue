@@ -31,7 +31,7 @@ async function setup() {
 
     // top frame
     cfg.dotSize = [0, 6];
-    NYLine(padding, padding, width - padding, padding);
+    NYLineVerticalWithNoise(padding, padding, width - padding, padding);
 
     cfg.dotSize = [1, 3];
 
@@ -141,7 +141,7 @@ async function setup() {
             y1 += cloudPadding * paddingNoise;
             // y1 += random(10, 60);
 
-            if (random() < 0.9) NYLine(x1, y1, x2, y2);
+            if (random() < 0.9) NYLineVerticalWithNoise(x1, y1, x2, y2);
 
             if (i % 200) await sleep(1);
         }
@@ -149,9 +149,19 @@ async function setup() {
 
     // frame
     cfg.dotSize = [0, 6];
-    NYLine(padding, padding, padding, height - padding);
-    NYLine(width - padding, padding, width - padding, height - padding);
-    NYLine(padding, height - padding, width - padding, height - padding);
+    NYLineVerticalWithNoise(padding, padding, padding, height - padding);
+    NYLineVerticalWithNoise(
+        width - padding,
+        padding,
+        width - padding,
+        height - padding
+    );
+    NYLineVerticalWithNoise(
+        padding,
+        height - padding,
+        width - padding,
+        height - padding
+    );
 
     cfg.dotSize = [1, 3];
 
@@ -227,7 +237,7 @@ async function setup() {
         y1 += cloudPadding * paddingNoise;
         // y1 += random(10, 60);
 
-        if (random() < 0.9) NYLine(x1, y1, x2, y2);
+        if (random() < 0.9) NYLineVerticalWithNoise(x1, y1, x2, y2);
 
         if (i % 200) await sleep(1);
     }
@@ -246,14 +256,13 @@ async function NYRect(_x, _y, _width, _height) {
         let x2 = x1;
         let y2 = _y + _height;
 
-        NYLine(x1, y1, x2, y2);
+        NYLineVerticalWithNoise(x1, y1, x2, y2);
         await sleep(1);
     }
 }
 
-function NYLine(_x1, _y1, _x2, _y2) {
+function NYLineVerticalWithNoise(_x1, _y1, _x2, _y2) {
     let dotCount = dist(_x1, _y1, _x2, _y2) * cfg.dotDensity;
-    let stepDistance = dist(_x1, _y1, _x2, _y2) / dotCount;
 
     let forwardAngle = getAngle(_x1, _y1, _x2, _y2);
 
