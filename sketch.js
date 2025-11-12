@@ -19,7 +19,7 @@ const cfg = {
     myColour: undefined,
     pointNoiseScaleX: 0.06,
     pointNoiseRadius: 3,
-    enableCloudLines: true,
+    enableCloudPainting: true,
     showPath: true,
     showCircles: true,
     breakWhenPossible: false,
@@ -31,7 +31,7 @@ let gui;
 
 function setupGUI() {
     gui = new GUI();
-    gui.add(cfg, "enableCloudLines");
+    gui.add(cfg, "enableCloudPainting");
     gui.add(cfg, "lineWavingLength");
     gui.add(cfg, "breakWhenPossible");
     gui.add(cfg, "showPath");
@@ -73,7 +73,7 @@ async function redrawFullScene() {
         return;
     }
 
-    if (cfg.enableCloudLines) {
+    if (cfg.enableCloudPainting) {
         await paintCloudLinesFromCloudPaths(cloudPaths, paths, padding);
     }
     if (cfg.breakWhenPossible) {
