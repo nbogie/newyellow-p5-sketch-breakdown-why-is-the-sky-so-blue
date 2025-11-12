@@ -8,7 +8,6 @@ const cfg = {
     dotSize: [1, 3],
     myColour: undefined,
     pointNoiseScaleX: 0.06,
-    pointNoiseScaleY: 0.003,
     pointNoiseRadius: 3,
 };
 
