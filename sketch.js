@@ -289,5 +289,7 @@ function NoisePoint(_x, _y, _scaler = 1) {
     circle(_x, _y + offsetY, nowDotSize * _scaler);
 }
 
+//@ts-ignore
 window.setup = setup;
+//@ts-ignore
 window.draw = draw;
