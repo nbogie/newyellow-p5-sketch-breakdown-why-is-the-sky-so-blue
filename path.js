@@ -1,15 +1,29 @@
 import { sleep } from "./animUtils.js";
 import { CircleData, getAngle } from "./CircleData.js";
 
-let SHOW_PATH = true;
-let SHOW_CIRCLES = true;
+/**
+ * @typedef {{x:number, y:number}[]} PointPath
+ */
 
 // get circles on the path
+/**
+ *
+ * @param {{x:number, y:number}[]} _pathPoints
+ * @param {number} _minSize
+ * @param {number} _maxSize
+ * @param {{showPath:boolean, showCircles:boolean}} options
+ * @returns {Promise<CircleData[]>}
+ */
 export async function getCircleQueue(
     _pathPoints,
     _minSize = 10,
-    _maxSize = 60
+    _maxSize = 60,
+    { showPath, showCircles }
 ) {
+    if (showPath === undefined || showCircles === undefined) {
+        throw new Error("missing showPath and/or showCircles");
+    }
+
     let resultCircles = [];
 
     let pathIndex = 0;
@@ -37,7 +51,7 @@ export async function getCircleQueue(
     let nowSteps = 0;
     let nowT = 0.0;
 
-    if (SHOW_CIRCLES) {
+    if (showCircles) {
         stroke(random(0, 360), 40, 100);
         noFill();
         circle(nowX, nowY, lastCircleSize * 2);
@@ -57,7 +71,7 @@ export async function getCircleQueue(
         nowX = lerp(fromX, toX, nowT);
         nowY = lerp(fromY, toY, nowT);
 
-        if (SHOW_PATH) {
+        if (showPath) {
             noStroke();
             fill("blue");
             circle(nowX, nowY, 2);
@@ -68,7 +82,7 @@ export async function getCircleQueue(
 
         // arrive dest circle point
         if (distToLastCircle >= nextCircleDist) {
-            if (SHOW_CIRCLES) {
+            if (showCircles) {
                 stroke(random(0, 360), 40, 100);
                 noFill();
                 circle(nowX, nowY, nextCircleSize * 2);
@@ -104,7 +118,7 @@ export async function getCircleQueue(
                 let endCircleY =
                     lastCircleY - cos(radians(walkDir)) * nextCircleDist;
 
-                if (SHOW_CIRCLES) {
+                if (showCircles) {
                     stroke(random(0, 360), 40, 100);
                     noFill();
                     circle(endCircleX, endCircleY, nextCircleSize);
@@ -137,8 +151,22 @@ export async function getCircleQueue(
     return resultCircles;
 }
 
-// get the path on the circles
-export async function getCircleWalkPath(_circles, _walkSpeed = 1) {
+/**
+ * get the path on the circles
+ * @param {CircleData[]} _circles
+ * @param {number} _walkSpeed
+ * @param {{showCircles:boolean, showPath: boolean}} options
+ * @returns {Promise<PointPath>}
+ */
+export async function getCircleWalkPath(
+    _circles,
+    _walkSpeed = 1,
+    { showPath }
+) {
+    if (showPath === undefined) {
+        throw new Error("missing showPath");
+    }
+
     // draw on the edge of circles
     let nowCircleIndex = 0;
     let nowWalkingAngle = -90;
@@ -157,7 +185,7 @@ export async function getCircleWalkPath(_circles, _walkSpeed = 1) {
     let counter = 0;
 
     while (true) {
-        if (SHOW_PATH) {
+        if (showPath) {
             fill("white");
             noStroke();
             circle(walkX, walkY, 6);
@@ -213,14 +241,30 @@ export async function getCircleWalkPath(_circles, _walkSpeed = 1) {
     return resultPathData;
 }
 
+/**
+ * returns a promise which resolves to some sort of path (array of points).  May also print out some debugging stuff
+ * @param {number} _x1
+ * @param {number} _y1
+ * @param {number} _x2
+ * @param {number} _y2
+ * @param {number} _noiseScale
+ * @param {number} _wavingHeight
+ * @param {{showPath:boolean}} options
+ * @returns {Promise<PointPath>} noise path
+ */
 export async function getNoisePath(
     _x1,
     _y1,
     _x2,
     _y2,
     _noiseScale,
-    _wavingHeight
+    _wavingHeight,
+    { showPath }
 ) {
+    if (showPath === undefined) {
+        throw new Error("missing showPath");
+    }
+
     let walkDir = getAngle(_x1, _y1, _x2, _y2) + 90;
     let walkCount = dist(_x1, _y1, _x2, _y2);
 
@@ -240,7 +284,7 @@ export async function getNoisePath(
         let wavingY =
             nowY - cos(radians(wavingDir)) * wavingHeight - 0.5 * wavingHeight;
 
-        if (SHOW_PATH) {
+        if (showPath) {
             fill("white");
             noStroke();
             circle(wavingX, wavingY, 2);

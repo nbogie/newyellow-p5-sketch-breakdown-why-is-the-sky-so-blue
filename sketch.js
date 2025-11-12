@@ -3,6 +3,11 @@ import { getAngle } from "./CircleData.js";
 import { makeCloudPaths } from "./cloudPaths.js";
 //@ts-ignore
 import { GUI } from "https://unpkg.com/dat.gui@0.7.9/build/dat.gui.module.js";
+
+/**
+ * @typedef {import("./path.js").PointPath} PointPath
+ */
+
 const cfg = {
     lineWaveNoiseScale: 0.02,
     lineWavingLength: 3,
@@ -15,6 +20,8 @@ const cfg = {
     pointNoiseScaleX: 0.06,
     pointNoiseRadius: 3,
     enableCloudLines: true,
+    enableShowPath: true,
+    enableShowCircles: true,
 };
 
 //this is not config, it is state which changes during the animated render process
@@ -52,7 +59,10 @@ async function redrawScene() {
 
     cfg.dotSize = [1, 3];
 
-    const { paths, cloudPaths } = await makeCloudPaths(padding);
+    const { paths, cloudPaths } = await makeCloudPaths(padding, {
+        showPath: cfg.enableShowPath,
+        showCircles: cfg.enableShowCircles,
+    });
 
     if (cfg.enableCloudLines) {
         await paintCloudLinesFromCloudPaths(cloudPaths, paths, padding);
@@ -223,6 +233,13 @@ function NoisePoint(_x, _y, _scaler = 1) {
 window.setup = setup;
 //@ts-ignore
 window.draw = () => {};
+
+/**
+ *
+ * @param {PointPath[]} cloudPaths
+ * @param {PointPath[]} paths
+ * @param {number} padding
+ */
 async function paintCloudLinesFromCloudPaths(cloudPaths, paths, padding) {
     for (let p = 0; p < cloudPaths.length; p++) {
         /** the current cloudPath being painted */

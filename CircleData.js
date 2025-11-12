@@ -26,12 +26,16 @@ export class CircleData {
         return angleToCenter + 90;
     }
 
-    // math from Lulu's blog:
-    // https://lucidar.me/en/mathematics/how-to-calculate-the-intersection-points-of-two-circles/#calculating-a-and-b
-    getIntersectionAngle(_circle) {
+    /**
+     * @param {CircleData} otherCircle
+     * @returns {[number, number]} two intersection angles (possibly the same if they just touch)
+     * @note math from Lulu's blog:
+     * https://lucidar.me/en/mathematics/how-to-calculate-the-intersection-points-of-two-circles/#calculating-a-and-b
+     */
+    getIntersectionAngle(otherCircle) {
         let r1 = this.radius;
-        let r2 = _circle.radius;
-        let d = dist(this.x, this.y, _circle.x, _circle.y);
+        let r2 = otherCircle.radius;
+        let d = dist(this.x, this.y, otherCircle.x, otherCircle.y);
 
         let a = (r1 * r1 - r2 * r2 + d * d) / (2 * d);
         let b = (r2 * r2 - r1 * r1 + d * d) / (2 * d);
@@ -39,7 +43,8 @@ export class CircleData {
         let h = sqrt(r1 * r1 - a * a);
 
         let intersectPointSlope = degrees(atan2(h, a));
-        let forwardAngle = getAngle(this.x, this.y, _circle.x, _circle.y) + 90;
+        let forwardAngle =
+            getAngle(this.x, this.y, otherCircle.x, otherCircle.y) + 90;
 
         return [
             forwardAngle - intersectPointSlope,
