@@ -46,15 +46,6 @@ export class CircleData {
             forwardAngle + intersectPointSlope,
         ];
     }
-
-    getIntersectionPoint(_circle) {
-        let intersectionDegree = this.getIntersectionAngle(_circle);
-        let intersectX =
-            this.x + sin(radians(intersectionDegree)) * this.radius;
-        let intersectY =
-            this.y - cos(radians(intersectionDegree)) * this.radius;
-        return { x: intersectX, y: intersectY };
-    }
 }
 
 // calculate degree
