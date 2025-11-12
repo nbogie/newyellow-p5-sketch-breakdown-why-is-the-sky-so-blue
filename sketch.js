@@ -20,8 +20,9 @@ const cfg = {
     pointNoiseScaleX: 0.06,
     pointNoiseRadius: 3,
     enableCloudPainting: true,
-    showPath: true,
-    showCircles: true,
+    showPath: false,
+    showCircles: false,
+    showCloudPaths: true,
     breakWhenPossible: false,
 };
 
@@ -36,6 +37,7 @@ function setupGUI() {
     gui.add(cfg, "breakWhenPossible");
     gui.add(cfg, "showPath");
     gui.add(cfg, "showCircles");
+    gui.add(cfg, "showCloudPaths");
 }
 
 async function setup() {
@@ -73,6 +75,21 @@ async function redrawFullScene() {
         return;
     }
 
+    if (cfg.showCloudPaths) {
+        stroke("magenta");
+        strokeWeight(3);
+        noFill();
+        for (let path of cloudPaths) {
+            beginShape();
+            for (let p of path) {
+                vertex(p.x, p.y);
+            }
+            endShape();
+            return;
+        }
+        return;
+    }
+
     if (cfg.enableCloudPainting) {
         await paintCloudLinesFromCloudPaths(cloudPaths, paths, padding);
     }
@@ -80,7 +97,9 @@ async function redrawFullScene() {
         return;
     }
 
-    // frame
+    //Draw rest of frame - it would have been drawn over if we had drawn it along with the top line
+    //Note that the last cloud layer may erase over the bottom of the frame (including lower parts of the sides)
+    //A lovely touch!
     cfg.dotSize = [0, 6];
     NYNoisyLine(padding, padding, padding, height - padding);
     NYNoisyLine(width - padding, padding, width - padding, height - padding);
