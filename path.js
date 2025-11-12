@@ -8,13 +8,16 @@ import { CircleData, getAngle } from "./CircleData.js";
 /**
  *
  * @param {number} padding
- * @param {{showPath:boolean, showCircles:boolean, breakWhenPossible:boolean}} config
+ * @param {{showPath:boolean, showCircles:boolean, breakWhenPossible:boolean, fixedPathCount:number}} config
  * @returns {Promise<{paths: PointPath[], cloudPaths: PointPath[]}>}
  */
 export async function makeCloudPaths(padding, config) {
     const paths = [];
     const cloudPaths = [];
-    let pathCount = floor(random(6, 20));
+    const pathCount =
+        config.fixedPathCount > 0
+            ? config.fixedPathCount
+            : floor(random(6, 20));
     let pathDist = (height * 0.6) / pathCount;
 
     for (let i = 0; i < pathCount; i++) {

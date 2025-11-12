@@ -24,6 +24,8 @@ const cfg = {
     showCircles: false,
     showCloudPaths: false,
     breakWhenPossible: false,
+    /** how many cloud layers to generate.  Set this to zero normally for random choice. */
+    fixedPathCount: 2,
 };
 
 //this is not config, it is state which changes during the animated render process
@@ -38,6 +40,7 @@ function setupGUI() {
     gui.add(cfg, "showPath");
     gui.add(cfg, "showCircles");
     gui.add(cfg, "showCloudPaths");
+    gui.add(cfg, "fixedPathCount", 0, 20, 1);
 }
 
 async function setup() {
@@ -64,12 +67,11 @@ async function redrawFullScene() {
         height - padding * 2
     );
 
-    // top frame
+    // top frame - this gets drawn before cloud layers as the cloud layers may break out and over the frame.  (lovely!)
     cfg.dotSize = [0, 6];
     NYNoisyLine(padding, padding, width - padding, padding);
 
     cfg.dotSize = [1, 3];
-
     const { paths, cloudPaths } = await makeCloudPaths(padding, cfg);
     if (cfg.breakWhenPossible) {
         return;
