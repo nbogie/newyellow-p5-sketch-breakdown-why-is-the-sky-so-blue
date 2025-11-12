@@ -8,13 +8,13 @@ let lineSizeNoiseScale = 0.02;
 let dotDensity = 0.8;
 let dotSize = [1, 3];
 
-let MONDRIAN;
+let myColour;
 
 async function setup() {
     createCanvas(windowWidth, windowHeight);
     background(240);
 
-    MONDRIAN = color(15, 71, 140);
+    myColour = color(15, 71, 140);
 
     // background
     let padding = 0.06 * min(width, height);
@@ -100,8 +100,8 @@ async function setup() {
                 if (shadeT < 0.2) shadeScaler = shadeT / 0.2;
 
                 noStroke();
-                MONDRIAN.setAlpha(255 * random(0.4, 0.8));
-                fill(MONDRIAN);
+                myColour.setAlpha(255 * random(0.4, 0.8));
+                fill(myColour);
                 NoisePoint(x1, y1, shadeScaler);
 
                 if (i % 20 == 0) await sleep(1);
@@ -188,8 +188,8 @@ async function setup() {
             if (shadeT < 0.2) shadeScaler = shadeT / 0.2;
 
             noStroke();
-            MONDRIAN.setAlpha(255 * random(0.4, 0.8));
-            fill(MONDRIAN);
+            myColour.setAlpha(255 * random(0.4, 0.8));
+            fill(myColour);
             NoisePoint(x1, y1, shadeScaler);
 
             if (i % 20 == 0) await sleep(1);
@@ -273,8 +273,8 @@ function NYLine(_x1, _y1, _x2, _y2) {
         yPos -= cos(radians(forwardAngle)) * lineWavingLength * waveNoise;
 
         strokeWeight(lineThickness);
-        MONDRIAN.setAlpha(255 * random(0.3, 0.6));
-        fill(MONDRIAN);
+        myColour.setAlpha(255 * random(0.3, 0.6));
+        fill(myColour);
         noStroke();
 
         circle(xPos, yPos, nowDotSize);
