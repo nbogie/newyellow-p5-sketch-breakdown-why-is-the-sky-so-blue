@@ -8,19 +8,19 @@ import { CircleData, getAngle } from "./CircleData.js";
 // get circles on the path
 /**
  *
- * @param {{x:number, y:number}[]} _pathPoints
+ * @param {PointPath} _pathPoints
  * @param {number} _minSize
  * @param {number} _maxSize
- * @param {{showPath:boolean, showCircles:boolean}} options
+ * @param {{breakWhenPossible:boolean, showPath:boolean, showCircles:boolean}} config
  * @returns {Promise<CircleData[]>}
  */
 export async function getCircleQueue(
     _pathPoints,
     _minSize = 10,
     _maxSize = 60,
-    { showPath, showCircles }
+    config
 ) {
-    if (showPath === undefined || showCircles === undefined) {
+    if (config.showPath === undefined || config.showCircles === undefined) {
         throw new Error("missing showPath and/or showCircles");
     }
 
@@ -51,7 +51,7 @@ export async function getCircleQueue(
     let nowSteps = 0;
     let nowT = 0.0;
 
-    if (showCircles) {
+    if (config.showCircles) {
         stroke(random(0, 360), 40, 100);
         noFill();
         circle(nowX, nowY, lastCircleSize * 2);
@@ -71,7 +71,7 @@ export async function getCircleQueue(
         nowX = lerp(fromX, toX, nowT);
         nowY = lerp(fromY, toY, nowT);
 
-        if (showPath) {
+        if (config.showPath) {
             noStroke();
             fill("blue");
             circle(nowX, nowY, 2);
@@ -82,7 +82,7 @@ export async function getCircleQueue(
 
         // arrive dest circle point
         if (distToLastCircle >= nextCircleDist) {
-            if (showCircles) {
+            if (config.showCircles) {
                 stroke(random(0, 360), 40, 100);
                 noFill();
                 circle(nowX, nowY, nextCircleSize * 2);
@@ -118,7 +118,7 @@ export async function getCircleQueue(
                 let endCircleY =
                     lastCircleY - cos(radians(walkDir)) * nextCircleDist;
 
-                if (showCircles) {
+                if (config.showCircles) {
                     stroke(random(0, 360), 40, 100);
                     noFill();
                     circle(endCircleX, endCircleY, nextCircleSize);
@@ -145,7 +145,12 @@ export async function getCircleQueue(
         counter++;
         nowSteps++;
 
-        if (counter % 100 == 0) await sleep(1);
+        if (counter % 100 == 0) {
+            if (config.breakWhenPossible) {
+                break;
+            }
+            await sleep(1);
+        }
     }
 
     return resultCircles;
@@ -155,7 +160,7 @@ export async function getCircleQueue(
  * get the path on the circles
  * @param {CircleData[]} _circles
  * @param {number} _walkSpeed
- * @param {{showCircles:boolean, showPath: boolean}} options
+ * @param {{breakWhenPossible:boolean, showCircles:boolean, showPath: boolean}} config
  * @returns {Promise<PointPath>}
  */
 export async function getCircleWalkPath(
@@ -249,7 +254,7 @@ export async function getCircleWalkPath(
  * @param {number} _y2
  * @param {number} _noiseScale
  * @param {number} _wavingHeight
- * @param {{showPath:boolean}} options
+ * @param {{showPath:boolean, breakWhenPossible:boolean}} config
  * @returns {Promise<PointPath>} noise path
  */
 export async function getNoisePath(
@@ -259,12 +264,8 @@ export async function getNoisePath(
     _y2,
     _noiseScale,
     _wavingHeight,
-    { showPath }
+    config
 ) {
-    if (showPath === undefined) {
-        throw new Error("missing showPath");
-    }
-
     let walkDir = getAngle(_x1, _y1, _x2, _y2) + 90;
     let walkCount = dist(_x1, _y1, _x2, _y2);
 
@@ -284,14 +285,19 @@ export async function getNoisePath(
         let wavingY =
             nowY - cos(radians(wavingDir)) * wavingHeight - 0.5 * wavingHeight;
 
-        if (showPath) {
+        if (config.showPath) {
             fill("white");
             noStroke();
             circle(wavingX, wavingY, 2);
         }
         pathPoints.push({ x: wavingX, y: wavingY });
 
-        if (i % 100 == 0) await sleep(1);
+        if (i % 100 == 0) {
+            if (config.breakWhenPossible) {
+                break;
+            }
+            await sleep(1);
+        }
     }
 
     return pathPoints;

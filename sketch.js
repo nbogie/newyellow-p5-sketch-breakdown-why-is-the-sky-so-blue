@@ -20,8 +20,9 @@ const cfg = {
     pointNoiseScaleX: 0.06,
     pointNoiseRadius: 3,
     enableCloudLines: true,
-    enableShowPath: true,
-    enableShowCircles: true,
+    showPath: true,
+    showCircles: true,
+    breakWhenPossible: true,
 };
 
 //this is not config, it is state which changes during the animated render process
@@ -32,6 +33,7 @@ function setupGUI() {
     gui = new GUI();
     gui.add(cfg, "enableCloudLines");
     gui.add(cfg, "lineWavingLength");
+    gui.add(cfg, "breakWhenPossible");
 }
 
 async function setup() {
@@ -59,13 +61,16 @@ async function redrawScene() {
 
     cfg.dotSize = [1, 3];
 
-    const { paths, cloudPaths } = await makeCloudPaths(padding, {
-        showPath: cfg.enableShowPath,
-        showCircles: cfg.enableShowCircles,
-    });
+    const { paths, cloudPaths } = await makeCloudPaths(padding, cfg);
+    if (cfg.breakWhenPossible) {
+        return;
+    }
 
     if (cfg.enableCloudLines) {
         await paintCloudLinesFromCloudPaths(cloudPaths, paths, padding);
+    }
+    if (cfg.breakWhenPossible) {
+        return;
     }
 
     // frame
@@ -100,7 +105,13 @@ async function redrawScene() {
         stroke(240);
         line(x1, y1, x2, y2);
 
-        if (i % 100 == 0) await sleep(1);
+        if (i % 100 == 0) {
+            if (cfg.breakWhenPossible) {
+                return;
+            }
+
+            await sleep(1);
+        }
     }
 
     // draw cloud path
@@ -130,7 +141,12 @@ async function redrawScene() {
             fill(cfg.myColour);
             NoisePoint(x1, y1, shadeScaler);
 
-            if (i % 20 == 0) await sleep(1);
+            if (i % 20 == 0) {
+                if (cfg.breakWhenPossible) {
+                    return;
+                }
+                await sleep(1);
+            }
         }
     }
 
@@ -160,7 +176,13 @@ async function redrawScene() {
 
         if (random() < 0.9) NYLineVerticalWithNoise(x1, y1, x2, y2);
 
-        if (i % 200) await sleep(1);
+        if (i % 200) {
+            if (cfg.breakWhenPossible) {
+                return;
+            }
+
+            await sleep(1);
+        }
     }
 }
 async function NYRect(_x, _y, _width, _height) {
@@ -256,7 +278,13 @@ async function paintCloudLinesFromCloudPaths(cloudPaths, paths, padding) {
             stroke(240);
             line(x1, y1, x2, y2);
 
-            if (i % 100 == 0) await sleep(1);
+            if (i % 100 == 0) {
+                if (cfg.breakWhenPossible) {
+                    return;
+                }
+
+                await sleep(1);
+            }
         }
 
         // draw cloud path
@@ -287,7 +315,12 @@ async function paintCloudLinesFromCloudPaths(cloudPaths, paths, padding) {
                 fill(cfg.myColour);
                 NoisePoint(x1, y1, shadeScaler);
 
-                if (i % 20 == 0) await sleep(1);
+                if (i % 20 == 0) {
+                    if (cfg.breakWhenPossible) {
+                        return;
+                    }
+                    await sleep(1);
+                }
             }
         }
 
@@ -320,7 +353,13 @@ async function paintCloudLinesFromCloudPaths(cloudPaths, paths, padding) {
 
             if (random() < 0.9) NYLineVerticalWithNoise(x1, y1, x2, y2);
 
-            if (i % 200) await sleep(1);
+            if (i % 200) {
+                if (cfg.breakWhenPossible) {
+                    return;
+                }
+
+                await sleep(1);
+            }
         }
     }
 }
