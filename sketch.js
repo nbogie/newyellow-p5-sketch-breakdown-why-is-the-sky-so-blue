@@ -22,7 +22,7 @@ const cfg = {
     enableCloudLines: true,
     showPath: true,
     showCircles: true,
-    breakWhenPossible: true,
+    breakWhenPossible: false,
 };
 
 //this is not config, it is state which changes during the animated render process
@@ -34,15 +34,17 @@ function setupGUI() {
     gui.add(cfg, "enableCloudLines");
     gui.add(cfg, "lineWavingLength");
     gui.add(cfg, "breakWhenPossible");
+    gui.add(cfg, "showPath");
+    gui.add(cfg, "showCircles");
 }
 
 async function setup() {
     createCanvas(windowWidth, windowHeight);
     setupGUI();
-    await redrawScene();
+    await redrawFullScene();
 }
 
-async function redrawScene() {
+async function redrawFullScene() {
     background(240);
     cfg.myColour = color(15, 71, 140);
 
@@ -53,11 +55,16 @@ async function redrawScene() {
     cfg.lineDensity = random(0.06, 0.2);
     cfg.lineWaveNoiseScale = random(0.02, 0.12);
     cfg.dotSize = [1, 3];
-    await NYRect(padding, padding, width - padding * 2, height - padding * 2);
+    await NYRectOfNYNoisyLines(
+        padding,
+        padding,
+        width - padding * 2,
+        height - padding * 2
+    );
 
     // top frame
     cfg.dotSize = [0, 6];
-    NYLineVerticalWithNoise(padding, padding, width - padding, padding);
+    NYNoisyLine(padding, padding, width - padding, padding);
 
     cfg.dotSize = [1, 3];
 
@@ -75,19 +82,9 @@ async function redrawScene() {
 
     // frame
     cfg.dotSize = [0, 6];
-    NYLineVerticalWithNoise(padding, padding, padding, height - padding);
-    NYLineVerticalWithNoise(
-        width - padding,
-        padding,
-        width - padding,
-        height - padding
-    );
-    NYLineVerticalWithNoise(
-        padding,
-        height - padding,
-        width - padding,
-        height - padding
-    );
+    NYNoisyLine(padding, padding, padding, height - padding);
+    NYNoisyLine(width - padding, padding, width - padding, height - padding);
+    NYNoisyLine(padding, height - padding, width - padding, height - padding);
 
     cfg.dotSize = [1, 3];
 
@@ -174,7 +171,7 @@ async function redrawScene() {
         y1 += cloudPadding * paddingNoise;
         // y1 += random(10, 60);
 
-        if (random() < 0.9) NYLineVerticalWithNoise(x1, y1, x2, y2);
+        if (random() < 0.9) NYNoisyLine(x1, y1, x2, y2);
 
         if (i % 200) {
             if (cfg.breakWhenPossible) {
@@ -185,7 +182,7 @@ async function redrawScene() {
         }
     }
 }
-async function NYRect(_x, _y, _width, _height) {
+async function NYRectOfNYNoisyLines(_x, _y, _width, _height) {
     let xLines = _width * cfg.lineDensity;
     let xLineSpace = _width / (xLines - 1);
 
@@ -196,12 +193,12 @@ async function NYRect(_x, _y, _width, _height) {
         let x2 = x1;
         let y2 = _y + _height;
 
-        NYLineVerticalWithNoise(x1, y1, x2, y2);
+        NYNoisyLine(x1, y1, x2, y2);
         await sleep(1);
     }
 }
 
-function NYLineVerticalWithNoise(_x1, _y1, _x2, _y2) {
+function NYNoisyLine(_x1, _y1, _x2, _y2) {
     let dotCount = dist(_x1, _y1, _x2, _y2) * cfg.dotDensity;
 
     let forwardAngle = getAngle(_x1, _y1, _x2, _y2);
@@ -351,7 +348,7 @@ async function paintCloudLinesFromCloudPaths(cloudPaths, paths, padding) {
             y1 += cloudPadding * paddingNoise;
             // y1 += random(10, 60);
 
-            if (random() < 0.9) NYLineVerticalWithNoise(x1, y1, x2, y2);
+            if (random() < 0.9) NYNoisyLine(x1, y1, x2, y2);
 
             if (i % 200) {
                 if (cfg.breakWhenPossible) {
@@ -366,6 +363,6 @@ async function paintCloudLinesFromCloudPaths(cloudPaths, paths, padding) {
 
 window.keyPressed = function () {
     if (key === "r") {
-        redrawScene();
+        redrawFullScene();
     }
 };
