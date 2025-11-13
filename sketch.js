@@ -28,6 +28,7 @@ const cfg = {
     breakWhenPossible: false,
     /** how many cloud layers to generate.  Set this to zero normally for random choice. */
     fixedPathCount: 2,
+    disablePartX: true,
 };
 
 //this is not config, it is state which changes during the animated render process
@@ -42,6 +43,8 @@ function setupGUI() {
     gui.add(cfg, "showPath");
     gui.add(cfg, "showCircles");
     gui.add(cfg, "showCloudPaths");
+    gui.add(cfg, "disablePartX");
+
     gui.add(cfg, "fixedPathCount", 0, 20, 1);
 }
 
@@ -108,6 +111,9 @@ async function redrawFullScene() {
     NYNoisyLine(padding, height - padding, width - padding, height - padding);
 
     cfg.dotSize = [1, 3];
+    if (cfg.disablePartX) {
+        return;
+    }
     // draw the last cloud white, probably overlapping the frame
     let nowPath = cloudPaths[cloudPaths.length - 1];
 
@@ -351,6 +357,7 @@ async function paintCloudLinesFromCloudPaths(cloudPaths, paths, padding) {
         //don't do what comes after for last cloudPath
         if (p == paths.length - 1) break;
 
+        //do line shading inside of this cloud layer
         for (let i = 0; i < nowPath.length; i++) {
             let x1 = nowPath[i].x;
             let y1 = nowPath[i].y;
