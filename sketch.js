@@ -23,7 +23,9 @@ const cfg = {
     // debug / reveal options
     enableCloudPainting: true,
     showPath: false,
-    showCircleWalkPath: true,
+    showBasePaths: false,
+    showCircleWalkPath: false,
+    stopAfterPaths: false,
     showCircles: false,
     showCloudPaths: false,
     breakWhenPossible: false,
@@ -41,10 +43,12 @@ function setupGUI() {
     gui.add(cfg, "enableCloudPainting");
     gui.add(cfg, "lineWavingLength");
     gui.add(cfg, "breakWhenPossible");
-    gui.add(cfg, "showPath");
-    gui.add(cfg, "showCircleWalkPath");
+    gui.add(cfg, "showBasePaths");
     gui.add(cfg, "showCircles");
+    gui.add(cfg, "showCircleWalkPath");
     gui.add(cfg, "showCloudPaths");
+    gui.add(cfg, "showPath");
+    gui.add(cfg, "stopAfterPaths");
     gui.add(cfg, "disablePartX");
     gui.add(cfg, "layerCount", 0, 20, 1);
 }
@@ -82,22 +86,21 @@ async function redrawFullScene() {
         return;
     }
 
+    if (cfg.showBasePaths) {
+        drawDebugPaths(paths, "yellow", 2);
+    }
+
     if (cfg.showCloudPaths) {
-        stroke("magenta");
-        strokeWeight(3);
-        noFill();
-        for (let path of cloudPaths) {
-            beginShape();
-            for (let p of path) {
-                vertex(p.x, p.y);
-            }
-            endShape();
-        }
+        drawDebugPaths(cloudPaths, "magenta", 3);
+    }
+
+    if (cfg.stopAfterPaths) {
         return;
     }
+
     cfg.dotSize = [1, 3];
     if (cfg.enableCloudPainting) {
-        await paintCloudLinesFromCloudPaths(cloudPaths, paths, padding);
+        await paintCloudLinesFromCloudPaths(cloudPaths, padding);
     }
     if (cfg.breakWhenPossible) {
         return;
@@ -196,16 +199,16 @@ window.draw = () => {};
 /**
  *
  * @param {PointPath[]} cloudPaths
- * @param {PointPath[]} paths
  * @param {number} padding
  */
-async function paintCloudLinesFromCloudPaths(cloudPaths, paths, padding) {
+async function paintCloudLinesFromCloudPaths(cloudPaths, padding) {
     for (let index = 0; index < cloudPaths.length; index++) {
+        const isLast = index === cloudPaths.length - 1;
+        const isFirst = index === 0;
         await paintOneCloud(cloudPaths[index], {
             padding,
-            alwaysShade: index === 0,
-            //TODO: can't we use cloudPaths length here?  aren't they always same len? (cloudPaths & paths)
-            skipLineShading: index == paths.length - 1,
+            alwaysShade: isFirst,
+            skipLineShading: isLast,
         });
     }
 }
@@ -323,3 +326,19 @@ window.keyPressed = function () {
         redrawFullScene();
     }
 };
+
+function drawDebugPaths(paths, colour, weight) {
+    push();
+    stroke(colour);
+    strokeWeight(weight);
+    noFill();
+    for (let path of paths) {
+        beginShape();
+        for (let p of path) {
+            vertex(p.x, p.y);
+        }
+        endShape();
+    }
+    pop();
+    return;
+}
