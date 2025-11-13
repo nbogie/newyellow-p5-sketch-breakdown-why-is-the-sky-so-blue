@@ -12,8 +12,31 @@ import { CircleData, getAngle } from "./CircleData.js";
  * @returns {Promise<{paths: PointPath[], cloudPaths: PointPath[]}>}
  */
 export async function makeCloudPaths(padding, config) {
-    const paths = [];
+    const basePaths = await makeBaseNoisePaths(config, padding);
+
     const cloudPaths = [];
+
+    // calculate cloud paths into cloudPaths[]
+    for (let i = 0; i < basePaths.length; i++) {
+        if (config.breakWhenPossible) {
+            break;
+        }
+        let lv1Circles = await getCircleQueue(basePaths[i], 30, 240, config);
+        let lv1Path = await getCircleWalkPath(lv1Circles, 1, config);
+
+        let lv2Circles = await getCircleQueue(lv1Path, 10, 60, config);
+        cloudPaths[i] = await getCircleWalkPath(lv2Circles, 1, config);
+    }
+    return { paths: basePaths, cloudPaths };
+}
+/**
+ * Make a random number of base noise paths for clouds
+ * @param {number} padding
+ * @param {{breakWhenPossible:boolean, layerCount:number}} config
+ * @returns {Promise<PointPath[]>}
+ */
+async function makeBaseNoisePaths(config, padding) {
+    const paths = [];
     const pathCount =
         config.layerCount > 0 ? config.layerCount : floor(random(6, 20));
     let pathDist = (height * 0.6) / pathCount;
@@ -37,21 +60,8 @@ export async function makeCloudPaths(padding, config) {
             config
         );
     }
-
-    // get cloud paths into cloudPaths[]
-    for (let i = 0; i < paths.length; i++) {
-        if (config.breakWhenPossible) {
-            break;
-        }
-        let lv1Circles = await getCircleQueue(paths[i], 30, 240, config);
-        let lv1Path = await getCircleWalkPath(lv1Circles, 1, config);
-
-        let lv2Circles = await getCircleQueue(lv1Path, 10, 60, config);
-        cloudPaths[i] = await getCircleWalkPath(lv2Circles, 1, config);
-    }
-    return { paths, cloudPaths };
+    return paths;
 }
-
 // get circles on the path
 /**
  *
@@ -116,7 +126,7 @@ export async function getCircleQueue(
 
         if (config.showPath) {
             noStroke();
-            fill("blue");
+            fill("orange");
             circle(nowX, nowY, 2);
         }
 
@@ -293,7 +303,7 @@ export async function getCircleWalkPath(
  * @param {number} _y2
  * @param {number} _noiseScale
  * @param {number} _wavingHeight
- * @param {{showPath:boolean, breakWhenPossible:boolean}} config
+ * @param {{breakWhenPossible:boolean}} config
  * @returns {Promise<PointPath>} noise path
  */
 export async function getNoisePath(
