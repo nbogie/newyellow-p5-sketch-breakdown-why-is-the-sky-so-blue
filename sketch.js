@@ -286,108 +286,124 @@ window.draw = () => {};
  * @param {number} padding
  */
 async function paintCloudLinesFromCloudPaths(cloudPaths, paths, padding) {
-    for (let p = 0; p < cloudPaths.length; p++) {
-        /** the current cloudPath being painted */
-        let nowPath = cloudPaths[p];
+    for (let index = 0; index < cloudPaths.length; index++) {
+        await paintOneCloud(cloudPaths[index], {
+            padding,
+            alwaysShade: index === 0,
+            //TODO: can't we use cloudPaths length here?  aren't they always same len? (cloudPaths & paths)
+            skipLineShading: index == paths.length - 1,
+        });
+    }
+}
 
-        // fill cloud path
-        for (let i = 0; i < nowPath.length; i++) {
-            let x1 = nowPath[i].x;
-            let y1 = nowPath[i].y;
+/**
+ * Paints one cloud layer given its path
+ * @param {PointPath} nowPath
+ * @param {{padding:number, alwaysShade:boolean, skipLineShading:boolean}} options
+ */
+async function paintOneCloud(
+    nowPath,
+    { padding, alwaysShade, skipLineShading }
+) {
+    //draw the cloudPath
+    for (let i = 0; i < nowPath.length; i++) {
+        let x1 = nowPath[i].x;
+        let y1 = nowPath[i].y;
 
-            let x2 = x1;
-            let y2 = height;
+        let x2 = x1;
+        let y2 = height;
 
-            stroke(240);
-            line(x1, y1, x2, y2);
+        stroke(240);
+        line(x1, y1, x2, y2);
 
-            if (i % 100 == 0) {
+        if (i % 100 == 0) {
+            if (cfg.breakWhenPossible) {
+                return;
+            }
+
+            await sleep(1);
+        }
+    }
+
+    // draw cloud path
+    let shadeNX = random(-1000, 1000);
+    let shadeNScale = random(0.003, 0.02);
+    let shadeChance = random(0.6, 0.8);
+
+    //typically used for the first cloudPath (and re-do of last cloudPath, after frame drawn)
+    if (alwaysShade) {
+        shadeChance = 1;
+    }
+
+    for (let i = 0; i < nowPath.length; i++) {
+        let x1 = nowPath[i].x;
+        let y1 = nowPath[i].y;
+
+        if (x1 < padding || x1 > width - padding) continue;
+
+        shadeNX += shadeNScale;
+        let shadeNoise = noise(shadeNX);
+
+        if (shadeNoise < shadeChance) {
+            let shadeT = map(shadeNoise, 0, shadeChance, 1, 0);
+            let shadeScaler = 1.0;
+
+            if (shadeT < 0.2) shadeScaler = shadeT / 0.2;
+
+            noStroke();
+            cfg.myColour.setAlpha(255 * random(0.4, 0.8));
+            fill(cfg.myColour);
+            NoisePoint(x1, y1, shadeScaler);
+
+            if (i % 20 == 0) {
                 if (cfg.breakWhenPossible) {
                     return;
                 }
-
-                await sleep(1);
-            }
-        }
-
-        // draw cloud path
-        let shadeNX = random(-1000, 1000);
-        let shadeNScale = random(0.003, 0.02);
-        let shadeChance = random(0.6, 0.8);
-
-        //always, for first cloudPath
-        if (p == 0) shadeChance = 1;
-
-        for (let i = 0; i < nowPath.length; i++) {
-            let x1 = nowPath[i].x;
-            let y1 = nowPath[i].y;
-
-            if (x1 < padding || x1 > width - padding) continue;
-
-            shadeNX += shadeNScale;
-            let shadeNoise = noise(shadeNX);
-
-            if (shadeNoise < shadeChance) {
-                let shadeT = map(shadeNoise, 0, shadeChance, 1, 0);
-                let shadeScaler = 1.0;
-
-                if (shadeT < 0.2) shadeScaler = shadeT / 0.2;
-
-                noStroke();
-                cfg.myColour.setAlpha(255 * random(0.4, 0.8));
-                fill(cfg.myColour);
-                NoisePoint(x1, y1, shadeScaler);
-
-                if (i % 20 == 0) {
-                    if (cfg.breakWhenPossible) {
-                        return;
-                    }
-                    await sleep(1);
-                }
-            }
-        }
-
-        // draw cloud shade
-        let cloudPadding = random(60, 200);
-        let cloudPaddingNX = random(-1000, 1000);
-        let cloudPaddingNScale = 0.03;
-        // let cloudLineSpacing = floor(random(6, 18));
-        let cloudLineSpacing = floor(1.0 / cfg.lineDensity);
-
-        //don't do what comes after for last cloudPath
-        if (p == paths.length - 1) break;
-
-        //do line shading inside of this cloud layer
-        for (let i = 0; i < nowPath.length; i++) {
-            let x1 = nowPath[i].x;
-            let y1 = nowPath[i].y;
-
-            let x2 = x1;
-            let y2 = height - padding;
-
-            if (floor(x1) % cloudLineSpacing != 0) continue;
-
-            if (x1 < padding || x1 > width - padding) continue;
-
-            cloudPaddingNX += cloudPaddingNScale;
-            let paddingNoise = noise(cloudPaddingNX);
-
-            y1 += cloudPadding * paddingNoise;
-            // y1 += random(10, 60);
-
-            if (random() < 0.9) NYNoisyLine(x1, y1, x2, y2);
-
-            if (i % 200 == 0) {
-                if (cfg.breakWhenPossible) {
-                    return;
-                }
-
                 await sleep(1);
             }
         }
     }
-}
 
+    // draw cloud shade
+    let cloudPadding = random(60, 200);
+    let cloudPaddingNX = random(-1000, 1000);
+    let cloudPaddingNScale = 0.03;
+    // let cloudLineSpacing = floor(random(6, 18));
+    let cloudLineSpacing = floor(1.0 / cfg.lineDensity);
+
+    if (skipLineShading) {
+        return;
+    }
+
+    //do line shading inside of this cloud layer
+    for (let i = 0; i < nowPath.length; i++) {
+        let x1 = nowPath[i].x;
+        let y1 = nowPath[i].y;
+
+        let x2 = x1;
+        let y2 = height - padding;
+
+        if (floor(x1) % cloudLineSpacing != 0) continue;
+
+        if (x1 < padding || x1 > width - padding) continue;
+
+        cloudPaddingNX += cloudPaddingNScale;
+        let paddingNoise = noise(cloudPaddingNX);
+
+        y1 += cloudPadding * paddingNoise;
+        // y1 += random(10, 60);
+
+        if (random() < 0.9) NYNoisyLine(x1, y1, x2, y2);
+
+        if (i % 200 == 0) {
+            if (cfg.breakWhenPossible) {
+                return;
+            }
+
+            await sleep(1);
+        }
+    }
+}
 window.keyPressed = function () {
     if (key === "r") {
         redrawFullScene();
