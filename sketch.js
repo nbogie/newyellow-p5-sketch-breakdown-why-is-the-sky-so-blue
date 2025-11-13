@@ -73,7 +73,6 @@ async function redrawFullScene() {
     cfg.dotSize = [0, 6];
     NYNoisyLine(padding, padding, width - padding, padding);
 
-    cfg.dotSize = [1, 3];
     const { paths, cloudPaths } = await makeCloudPaths(padding, cfg);
     if (cfg.breakWhenPossible) {
         return;
@@ -92,7 +91,7 @@ async function redrawFullScene() {
         }
         return;
     }
-
+    cfg.dotSize = [1, 3];
     if (cfg.enableCloudPainting) {
         await paintCloudLinesFromCloudPaths(cloudPaths, paths, padding);
     }
@@ -194,7 +193,7 @@ async function redrawFullScene() {
 
         if (random() < 0.9) NYNoisyLine(x1, y1, x2, y2);
 
-        if (i % 200) {
+        if (i % 200 == 0) {
             if (cfg.breakWhenPossible) {
                 return;
             }
@@ -371,7 +370,7 @@ async function paintCloudLinesFromCloudPaths(cloudPaths, paths, padding) {
 
             if (random() < 0.9) NYNoisyLine(x1, y1, x2, y2);
 
-            if (i % 200) {
+            if (i % 200 == 0) {
                 if (cfg.breakWhenPossible) {
                     return;
                 }
