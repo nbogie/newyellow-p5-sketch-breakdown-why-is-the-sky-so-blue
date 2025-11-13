@@ -4,6 +4,8 @@ import { getAngle } from "./CircleData.js";
 import { GUI } from "https://unpkg.com/dat.gui@0.7.9/build/dat.gui.module.js";
 import { makeCloudPaths } from "./path.js";
 
+//TODO: consider factoring out cloud-painting between last and non-last layers, if they're very similar
+
 /**
  * @typedef {import("./path.js").PointPath} PointPath
  */
