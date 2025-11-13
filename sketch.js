@@ -8,6 +8,8 @@ import { GUI } from "https://unpkg.com/dat.gui@0.7.9/build/dat.gui.module.js";
  * @typedef {import("./path.js").PointPath} PointPath
  */
 
+p5.disableFriendlyErrors = true;
+
 const cfg = {
     lineWaveNoiseScale: 0.02,
     lineWavingLength: 3,
@@ -215,17 +217,17 @@ async function paintCloudsFromCloudPaths(cloudPaths, padding) {
 
 /**
  * Paints one cloud layer given its path
- * @param {PointPath} nowPath
+ * @param {PointPath} cloudPath
  * @param {{padding:number, alwaysShade:boolean, skipLineShading:boolean}} options
  */
 async function paintOneCloud(
-    nowPath,
+    cloudPath,
     { padding, alwaysShade, skipLineShading }
 ) {
     //draw the cloudPath
-    for (let i = 0; i < nowPath.length; i++) {
-        let x1 = nowPath[i].x;
-        let y1 = nowPath[i].y;
+    for (let i = 0; i < cloudPath.length; i++) {
+        let x1 = cloudPath[i].x;
+        let y1 = cloudPath[i].y;
 
         let x2 = x1;
         let y2 = height;
@@ -247,14 +249,14 @@ async function paintOneCloud(
     let shadeNScale = random(0.003, 0.02);
     let shadeChance = random(0.6, 0.8);
 
-    //typically used for the first cloudPath (and re-do of last cloudPath, after frame drawn)
+    //typically used for the first cloudPath and the re-do of the last cloudPath, after picture frame is drawn.
     if (alwaysShade) {
         shadeChance = 1;
     }
-
-    for (let i = 0; i < nowPath.length; i++) {
-        let x1 = nowPath[i].x;
-        let y1 = nowPath[i].y;
+    //draw line across top of cloud
+    for (let i = 0; i < cloudPath.length; i++) {
+        let x1 = cloudPath[i].x;
+        let y1 = cloudPath[i].y;
 
         if (x1 < padding || x1 > width - padding) continue;
 
@@ -293,9 +295,9 @@ async function paintOneCloud(
     }
 
     //do line shading inside of this cloud layer
-    for (let i = 0; i < nowPath.length; i++) {
-        let x1 = nowPath[i].x;
-        let y1 = nowPath[i].y;
+    for (let i = 0; i < cloudPath.length; i++) {
+        let x1 = cloudPath[i].x;
+        let y1 = cloudPath[i].y;
 
         let x2 = x1;
         let y2 = height - padding;
