@@ -9,26 +9,38 @@ import { CircleData, getAngle } from "./CircleData.js";
  *
  * @param {number} padding
  * @param {{showPath:boolean, showCircles:boolean, showCircleWalkPath:boolean, breakWhenPossible:boolean, layerCount:number}} config
- * @returns {Promise<{paths: PointPath[], cloudPaths: PointPath[]}>}
+ * @returns {Promise<{paths: PointPath[], cloudPaths: PointPath[], debugObjects: { lv1Circles: CircleData[], lv2Circles: CircleData[] }[]} >}
  */
 export async function makeCloudPaths(padding, config) {
     const basePaths = await makeBaseNoisePaths(config, padding);
 
     const cloudPaths = [];
-
+    const debugObjects = [];
     // calculate cloud paths into cloudPaths[]
     for (let i = 0; i < basePaths.length; i++) {
         if (config.breakWhenPossible) {
             break;
         }
-        let lv1Circles = await getCircleQueue(basePaths[i], 30, 240, config);
-        let lv1Path = await getCircleWalkPath(lv1Circles, 1, config);
+        let lv1Circles = await calculateConstructionCirclesAlongPath(
+            basePaths[i],
+            30,
+            240,
+            config
+        );
+        let lv1Path = await calculateWalkAlongCircles(lv1Circles, 1, config);
+        let lv2Circles = await calculateConstructionCirclesAlongPath(
+            lv1Path,
+            10,
+            60,
+            config
+        );
 
-        let lv2Circles = await getCircleQueue(lv1Path, 10, 60, config);
-        cloudPaths[i] = await getCircleWalkPath(lv2Circles, 1, config);
+        cloudPaths[i] = await calculateWalkAlongCircles(lv2Circles, 1, config);
+        debugObjects.push({ lv1Circles, lv2Circles });
     }
-    return { paths: basePaths, cloudPaths };
+    return { paths: basePaths, cloudPaths, debugObjects };
 }
+
 /**
  * Make a random number of base noise paths for clouds
  * @param {number} padding
@@ -68,10 +80,10 @@ async function makeBaseNoisePaths(config, padding) {
  * @param {PointPath} _pathPoints
  * @param {number} _minSize
  * @param {number} _maxSize
- * @param {{breakWhenPossible:boolean, showPath:boolean, showCircles:boolean}} config
+ * @param {{breakWhenPossible:boolean, showPath:boolean}} config
  * @returns {Promise<CircleData[]>}
  */
-export async function getCircleQueue(
+export async function calculateConstructionCirclesAlongPath(
     _pathPoints,
     _minSize = 10,
     _maxSize = 60,
@@ -104,11 +116,6 @@ export async function getCircleQueue(
     let nowSteps = 0;
     let nowT = 0.0;
 
-    if (config.showCircles) {
-        stroke(random(0, 360), 40, 100);
-        noFill();
-        circle(nowX, nowY, lastCircleSize * 2);
-    }
     resultCircles.push(
         new CircleData(_pathPoints[0].x, _pathPoints[0].y, lastCircleSize)
     );
@@ -124,22 +131,10 @@ export async function getCircleQueue(
         nowX = lerp(fromX, toX, nowT);
         nowY = lerp(fromY, toY, nowT);
 
-        if (config.showPath) {
-            noStroke();
-            fill("orange");
-            circle(nowX, nowY, 2);
-        }
-
         let distToLastCircle = dist(nowX, nowY, lastCircleX, lastCircleY);
-        let distToNextPathPoint = dist(nowX, nowY, nextPoint.x, nextPoint.y);
 
         // arrive dest circle point
         if (distToLastCircle >= nextCircleDist) {
-            if (config.showCircles) {
-                stroke(random(0, 360), 40, 100);
-                noFill();
-                circle(nowX, nowY, nextCircleSize * 2);
-            }
             resultCircles.push(new CircleData(nowX, nowY, nextCircleSize));
 
             lastCircleX = nowX;
@@ -163,19 +158,12 @@ export async function getCircleQueue(
 
                 // add last circle
                 let walkDir = getAngle(lastCircleX, lastCircleY, toX, toY) + 90;
-                // console.log(`fromX: ${fromX}, fromY: ${fromY}, toX: ${toX}, toY: ${toY}`);
-                // console.log("circleDir: " + walkDir);
 
                 let endCircleX =
                     lastCircleX + sin(radians(walkDir)) * nextCircleDist;
                 let endCircleY =
                     lastCircleY - cos(radians(walkDir)) * nextCircleDist;
 
-                if (config.showCircles) {
-                    stroke(random(0, 360), 40, 100);
-                    noFill();
-                    circle(endCircleX, endCircleY, nextCircleSize);
-                }
                 resultCircles.push(
                     new CircleData(endCircleX, endCircleY, nextCircleSize)
                 );
@@ -213,10 +201,10 @@ export async function getCircleQueue(
  * get the path on the circles
  * @param {CircleData[]} _circles
  * @param {number} _walkSpeed
- * @param {{breakWhenPossible:boolean, showCircles:boolean, showCircleWalkPath: boolean}} config
+ * @param {{breakWhenPossible:boolean, showCircleWalkPath: boolean}} config
  * @returns {Promise<PointPath>}
  */
-export async function getCircleWalkPath(
+export async function calculateWalkAlongCircles(
     _circles,
     _walkSpeed = 1,
     { showCircleWalkPath }

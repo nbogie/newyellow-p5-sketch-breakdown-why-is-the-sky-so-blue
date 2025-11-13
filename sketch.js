@@ -1,5 +1,5 @@
 import { sleep } from "./animUtils.js";
-import { getAngle } from "./CircleData.js";
+import { CircleData, getAngle } from "./CircleData.js";
 import { makeCloudPaths } from "./path.js";
 //@ts-ignore
 import { GUI } from "https://unpkg.com/dat.gui@0.7.9/build/dat.gui.module.js";
@@ -25,15 +25,21 @@ const cfg = {
     // debug / reveal options
     enableCloudPainting: true,
     showPath: false,
-    showBasePaths: false,
+    showBasePaths: true,
     showCircleWalkPath: false,
-    stopAfterPaths: false,
-    showCircles: false,
+    showCircles: true,
     showCloudPaths: false,
+    stopAfterPaths: true,
     breakWhenPossible: false,
     /** controls how many cloud layers to generate.  Should be set to zero normally for random choice. */
     layerCount: 2,
     disablePartX: false,
+    debugPalette: {
+        basePaths: "orange",
+        lv1Circles: "slategrey",
+        lv2Circles: "pink",
+        cloudPaths: "magenta",
+    },
 };
 
 //this is not config, it is state which changes during the animated render process
@@ -83,17 +89,26 @@ async function redrawFullScene() {
     cfg.dotSize = [0, 6];
     NYNoisyLine(padding, padding, width - padding, padding);
 
-    const { paths, cloudPaths } = await makeCloudPaths(padding, cfg);
+    const { paths, cloudPaths, debugObjects } = await makeCloudPaths(
+        padding,
+        cfg
+    );
     if (cfg.breakWhenPossible) {
         return;
     }
 
     if (cfg.showBasePaths) {
-        drawDebugPaths(paths, "yellow", 2);
+        drawDebugPaths(paths, cfg.debugPalette.basePaths, 2);
     }
 
+    if (cfg.showCircles) {
+        for (let set of debugObjects) {
+            drawDebugCircles(set.lv1Circles, cfg.debugPalette.lv1Circles, 3);
+            drawDebugCircles(set.lv2Circles, cfg.debugPalette.lv2Circles, 4);
+        }
+    }
     if (cfg.showCloudPaths) {
-        drawDebugPaths(cloudPaths, "magenta", 3);
+        drawDebugPaths(cloudPaths, cfg.debugPalette.cloudPaths, 5);
     }
 
     if (cfg.stopAfterPaths) {
@@ -343,4 +358,23 @@ function drawDebugPaths(paths, colour, weight) {
     }
     pop();
     return;
+}
+
+/**
+ *
+ * @param {CircleData[]} circles to draw
+ * @param {string} colour
+ * @param {number} weight  - weight of stroke
+ */
+function drawDebugCircles(circles, colour, weight) {
+    push();
+    noFill();
+    stroke(colour);
+    for (let c of circles) {
+        strokeWeight(weight);
+        circle(c.x, c.y, c.radius * 2);
+        strokeWeight(weight * 3);
+        point(c.x, c.y);
+    }
+    pop();
 }
