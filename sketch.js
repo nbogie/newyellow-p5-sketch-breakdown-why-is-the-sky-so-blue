@@ -23,11 +23,12 @@ const cfg = {
     // debug / reveal options
     enableCloudPainting: true,
     showPath: false,
+    showCircleWalkPath: true,
     showCircles: false,
     showCloudPaths: false,
     breakWhenPossible: false,
     /** controls how many cloud layers to generate.  Should be set to zero normally for random choice. */
-    layerCount: 0,
+    layerCount: 2,
     disablePartX: false,
 };
 
@@ -41,6 +42,7 @@ function setupGUI() {
     gui.add(cfg, "lineWavingLength");
     gui.add(cfg, "breakWhenPossible");
     gui.add(cfg, "showPath");
+    gui.add(cfg, "showCircleWalkPath");
     gui.add(cfg, "showCircles");
     gui.add(cfg, "showCloudPaths");
     gui.add(cfg, "disablePartX");

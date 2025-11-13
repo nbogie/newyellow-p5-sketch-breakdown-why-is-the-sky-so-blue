@@ -8,7 +8,7 @@ import { CircleData, getAngle } from "./CircleData.js";
 /**
  *
  * @param {number} padding
- * @param {{showPath:boolean, showCircles:boolean, breakWhenPossible:boolean, layerCount:number}} config
+ * @param {{showPath:boolean, showCircles:boolean, showCircleWalkPath:boolean, breakWhenPossible:boolean, layerCount:number}} config
  * @returns {Promise<{paths: PointPath[], cloudPaths: PointPath[]}>}
  */
 export async function makeCloudPaths(padding, config) {
@@ -67,10 +67,6 @@ export async function getCircleQueue(
     _maxSize = 60,
     config
 ) {
-    if (config.showPath === undefined || config.showCircles === undefined) {
-        throw new Error("missing showPath and/or showCircles");
-    }
-
     let resultCircles = [];
 
     let pathIndex = 0;
@@ -207,18 +203,14 @@ export async function getCircleQueue(
  * get the path on the circles
  * @param {CircleData[]} _circles
  * @param {number} _walkSpeed
- * @param {{breakWhenPossible:boolean, showCircles:boolean, showPath: boolean}} config
+ * @param {{breakWhenPossible:boolean, showCircles:boolean, showCircleWalkPath: boolean}} config
  * @returns {Promise<PointPath>}
  */
 export async function getCircleWalkPath(
     _circles,
     _walkSpeed = 1,
-    { showPath }
+    { showCircleWalkPath }
 ) {
-    if (showPath === undefined) {
-        throw new Error("missing showPath");
-    }
-
     // draw on the edge of circles
     let nowCircleIndex = 0;
     let nowWalkingAngle = -90;
@@ -237,7 +229,7 @@ export async function getCircleWalkPath(
     let counter = 0;
 
     while (true) {
-        if (showPath) {
+        if (showCircleWalkPath) {
             fill("white");
             noStroke();
             circle(walkX, walkY, 6);
@@ -294,7 +286,8 @@ export async function getCircleWalkPath(
 }
 
 /**
- * returns a promise which resolves to some sort of path (array of points).  May also print out some debugging stuff
+ * returns a promise which resolves to a baseline path (array of points) upon which a cloud layer will be build.
+ * May also print out some debugging stuff
  * @param {number} _x1
  * @param {number} _y1
  * @param {number} _x2
@@ -332,11 +325,6 @@ export async function getNoisePath(
         let wavingY =
             nowY - cos(radians(wavingDir)) * wavingHeight - 0.5 * wavingHeight;
 
-        if (config.showPath) {
-            fill("white");
-            noStroke();
-            circle(wavingX, wavingY, 2);
-        }
         pathPoints.push({ x: wavingX, y: wavingY });
 
         if (i % 100 == 0) {
