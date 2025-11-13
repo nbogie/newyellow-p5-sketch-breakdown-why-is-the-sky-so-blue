@@ -119,19 +119,21 @@ async function redrawFullScene() {
         skipLineShading: false,
     });
 }
-async function NYRectOfNYNoisyLines(_x, _y, _width, _height) {
-    let xLines = _width * cfg.lineDensity;
-    let xLineSpace = _width / (xLines - 1);
+async function NYRectOfNYNoisyLines(cornerX, cornerY, rectW, rectH) {
+    let xLines = rectW * cfg.lineDensity;
+    let xLineSpace = rectW / (xLines - 1);
 
-    for (let x = 0; x < xLines; x++) {
-        let x1 = _x + x * xLineSpace;
-        let y1 = _y;
+    for (let lineCount = 0; lineCount < xLines; lineCount++) {
+        let x1 = cornerX + lineCount * xLineSpace;
+        let y1 = cornerY;
 
         let x2 = x1;
-        let y2 = _y + _height;
+        let y2 = cornerY + rectH;
 
         NYNoisyLine(x1, y1, x2, y2);
-        await sleep(1);
+        if (lineCount % 10 === 0) {
+            await sleep(1);
+        }
     }
 }
 
