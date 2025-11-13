@@ -85,8 +85,8 @@ async function makeBaseNoisePaths(config, padding) {
  */
 export async function calculateConstructionCirclesAlongPath(
     _pathPoints,
-    _minSize = 10,
-    _maxSize = 60,
+    _minSize,
+    _maxSize,
     config
 ) {
     let resultCircles = [];
