@@ -98,7 +98,6 @@ export async function calculateConstructionCirclesAlongPath(
     let resultCircles = [];
 
     let pathIndex = 0;
-    let lastPoint = _pathPoints[0];
     let nextPoint = _pathPoints[1];
 
     // prepare next circle
@@ -175,8 +174,6 @@ export async function calculateConstructionCirclesAlongPath(
                 );
                 break;
             }
-
-            lastPoint = _pathPoints[pathIndex];
 
             pathIndex++;
 
