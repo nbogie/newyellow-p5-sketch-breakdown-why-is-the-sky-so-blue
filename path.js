@@ -6,16 +6,20 @@ import { CircleData, getAngle } from "./CircleData.js";
  */
 
 /**
+ * calculate a random number of cloud paths - each one being a list of points along the top of a randomly-generated fluffy cloud.
+ * @typedef {{ lv1Circles: CircleData[], lv2Circles: CircleData[], lv1Path: PointPath }} DebugObjects
  *
  * @param {number} padding
  * @param {{breakWhenPossible:boolean, layerCount:number}} config
- * @returns {Promise<{paths: PointPath[], cloudPaths: PointPath[], debugObjects: { lv1Circles: CircleData[], lv2Circles: CircleData[] }[]} >}
+ * @returns {Promise<{paths: PointPath[], cloudPaths: PointPath[], debugObjects: DebugObjects[]} >}
  */
 export async function calculateCloudPaths(padding, config) {
     const basePaths = await makeBaseNoisePaths(config, padding);
 
     const cloudPaths = [];
+    /** this will be returned to allow the caller to show some of the construction objects that went into the calculation of the finished path */
     const debugObjects = [];
+
     // calculate cloud paths into cloudPaths[]
     for (let i = 0; i < basePaths.length; i++) {
         if (config.breakWhenPossible) {
@@ -28,6 +32,7 @@ export async function calculateCloudPaths(padding, config) {
             config
         );
         let lv1Path = await calculateWalkAlongCircles(lv1Circles, 1, config);
+
         let lv2Circles = await calculateConstructionCirclesAlongPath(
             lv1Path,
             10,
@@ -35,8 +40,9 @@ export async function calculateCloudPaths(padding, config) {
             config
         );
 
-        cloudPaths[i] = await calculateWalkAlongCircles(lv2Circles, 1, config);
-        debugObjects.push({ lv1Circles, lv2Circles });
+        const lv2Path = await calculateWalkAlongCircles(lv2Circles, 1, config);
+        cloudPaths[i] = lv2Path;
+        debugObjects.push({ lv1Circles, lv2Circles, lv1Path });
     }
     return { paths: basePaths, cloudPaths, debugObjects };
 }
