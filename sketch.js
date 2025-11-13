@@ -99,16 +99,20 @@ async function redrawFullScene() {
 
     if (cfg.showBasePaths) {
         drawDebugPaths(paths, cfg.debugPalette.basePaths, 2);
+        await sleep(1000);
     }
 
     if (cfg.showCircles) {
         for (let set of debugObjects) {
             drawDebugCircles(set.lv1Circles, cfg.debugPalette.lv1Circles, 3);
+            await sleep(500);
             drawDebugCircles(set.lv2Circles, cfg.debugPalette.lv2Circles, 4);
+            await sleep(500);
         }
     }
     if (cfg.showCloudPaths) {
         drawDebugPaths(cloudPaths, cfg.debugPalette.cloudPaths, 5);
+        await sleep(1000);
     }
 
     if (cfg.stopAfterPaths) {
