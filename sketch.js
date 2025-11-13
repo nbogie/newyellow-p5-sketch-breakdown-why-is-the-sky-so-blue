@@ -1,6 +1,6 @@
 import { sleep } from "./animUtils.js";
 import { CircleData, getAngle } from "./CircleData.js";
-import { makeCloudPaths } from "./path.js";
+import { calculateCloudPaths } from "./path.js";
 //@ts-ignore
 import { GUI } from "https://unpkg.com/dat.gui@0.7.9/build/dat.gui.module.js";
 
@@ -89,7 +89,7 @@ async function redrawFullScene() {
     cfg.dotSize = [0, 6];
     NYNoisyLine(padding, padding, width - padding, padding);
 
-    const { paths, cloudPaths, debugObjects } = await makeCloudPaths(
+    const { paths, cloudPaths, debugObjects } = await calculateCloudPaths(
         padding,
         cfg
     );

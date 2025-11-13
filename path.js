@@ -11,7 +11,7 @@ import { CircleData, getAngle } from "./CircleData.js";
  * @param {{breakWhenPossible:boolean, layerCount:number}} config
  * @returns {Promise<{paths: PointPath[], cloudPaths: PointPath[], debugObjects: { lv1Circles: CircleData[], lv2Circles: CircleData[] }[]} >}
  */
-export async function makeCloudPaths(padding, config) {
+export async function calculateCloudPaths(padding, config) {
     const basePaths = await makeBaseNoisePaths(config, padding);
 
     const cloudPaths = [];
