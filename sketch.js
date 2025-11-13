@@ -100,7 +100,7 @@ async function redrawFullScene() {
 
     cfg.dotSize = [1, 3];
     if (cfg.enableCloudPainting) {
-        await paintCloudLinesFromCloudPaths(cloudPaths, padding);
+        await paintCloudsFromCloudPaths(cloudPaths, padding);
     }
     if (cfg.breakWhenPossible) {
         return;
@@ -201,7 +201,7 @@ window.draw = () => {};
  * @param {PointPath[]} cloudPaths
  * @param {number} padding
  */
-async function paintCloudLinesFromCloudPaths(cloudPaths, padding) {
+async function paintCloudsFromCloudPaths(cloudPaths, padding) {
     for (let index = 0; index < cloudPaths.length; index++) {
         const isLast = index === cloudPaths.length - 1;
         const isFirst = index === 0;
