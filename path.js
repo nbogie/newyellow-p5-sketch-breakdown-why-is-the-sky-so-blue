@@ -287,7 +287,6 @@ export async function getCircleWalkPath(
 
 /**
  * returns a promise which resolves to a baseline path (array of points) upon which a cloud layer will be build.
- * May also print out some debugging stuff
  * @param {number} _x1
  * @param {number} _y1
  * @param {number} _x2
