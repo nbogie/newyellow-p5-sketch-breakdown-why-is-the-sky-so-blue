@@ -1,10 +1,8 @@
 import { sleep } from "./animUtils.js";
 import { getAngle } from "./CircleData.js";
+import { makeCloudPaths } from "./path.js";
 //@ts-ignore
 import { GUI } from "https://unpkg.com/dat.gui@0.7.9/build/dat.gui.module.js";
-import { makeCloudPaths } from "./path.js";
-
-//TODO: consider factoring out cloud-painting between last and non-last layers, if they're very similar
 
 /**
  * @typedef {import("./path.js").PointPath} PointPath
@@ -18,16 +16,18 @@ const cfg = {
     lineSizeNoiseScale: 0.02,
     dotDensity: 0.8,
     dotSize: [1, 3],
+    /** titled MONDRIAN in the original sketch.  The base colour used in the sketch.  Its alpha is modified in places */
     myColour: undefined,
     pointNoiseScaleX: 0.06,
     pointNoiseRadius: 3,
+    // debug / reveal options
     enableCloudPainting: true,
     showPath: false,
     showCircles: false,
     showCloudPaths: false,
     breakWhenPossible: false,
-    /** how many cloud layers to generate.  Set this to zero normally for random choice. */
-    fixedPathCount: 4,
+    /** controls how many cloud layers to generate.  Should be set to zero normally for random choice. */
+    layerCount: 0,
     disablePartX: false,
 };
 
@@ -44,8 +44,7 @@ function setupGUI() {
     gui.add(cfg, "showCircles");
     gui.add(cfg, "showCloudPaths");
     gui.add(cfg, "disablePartX");
-
-    gui.add(cfg, "fixedPathCount", 0, 20, 1);
+    gui.add(cfg, "layerCount", 0, 20, 1);
 }
 
 async function setup() {
@@ -187,7 +186,7 @@ function NoisePoint(_x, _y, _scaler = 1) {
     circle(_x, _y + offsetY, nowDotSize * _scaler);
 }
 
-//@ts-ignore
+//@ts-ignore - these properties don't exist on window
 window.setup = setup;
 //@ts-ignore
 window.draw = () => {};
