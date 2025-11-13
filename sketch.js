@@ -27,8 +27,8 @@ const cfg = {
     showCloudPaths: false,
     breakWhenPossible: false,
     /** how many cloud layers to generate.  Set this to zero normally for random choice. */
-    fixedPathCount: 2,
-    disablePartX: true,
+    fixedPathCount: 4,
+    disablePartX: false,
 };
 
 //this is not config, it is state which changes during the animated render process
@@ -102,111 +102,22 @@ async function redrawFullScene() {
         return;
     }
 
-    //Draw rest of frame - it would have been drawn over if we had drawn it along with the top line
-    //Note that the last cloud layer may erase over the bottom of the frame (including lower parts of the sides)
+    //Draw rest of frame -
+    // It would have been potentially drawn over if we had drawn it along with the top line
+    // Note that the last cloud layer may erase over the bottom of the frame (including lower parts of the sides)
     //A lovely touch!
     cfg.dotSize = [0, 6];
     NYNoisyLine(padding, padding, padding, height - padding);
     NYNoisyLine(width - padding, padding, width - padding, height - padding);
     NYNoisyLine(padding, height - padding, width - padding, height - padding);
 
+    // draw the last cloud, probably overlapping the frame
     cfg.dotSize = [1, 3];
-    if (cfg.disablePartX) {
-        return;
-    }
-    // draw the last cloud white, probably overlapping the frame
-    let nowPath = cloudPaths[cloudPaths.length - 1];
-
-    // fill cloud path
-    for (let i = 0; i < nowPath.length; i++) {
-        let x1 = nowPath[i].x;
-        let y1 = nowPath[i].y;
-
-        let x2 = x1;
-        let y2 = height;
-
-        stroke(240);
-        line(x1, y1, x2, y2);
-
-        if (i % 100 == 0) {
-            if (cfg.breakWhenPossible) {
-                return;
-            }
-
-            await sleep(1);
-        }
-    }
-
-    // draw cloud path
-    let shadeNX = random(-1000, 1000);
-    let shadeNScale = random(0.003, 0.02);
-    let shadeChance = random(0.6, 0.8);
-
-    shadeChance = 1;
-
-    for (let i = 0; i < nowPath.length; i++) {
-        let x1 = nowPath[i].x;
-        let y1 = nowPath[i].y;
-
-        if (x1 < padding || x1 > width - padding) continue;
-
-        shadeNX += shadeNScale;
-        let shadeNoise = noise(shadeNX);
-
-        if (shadeNoise < shadeChance) {
-            let shadeT = map(shadeNoise, 0, shadeChance, 1, 0);
-            let shadeScaler = 1.0;
-
-            if (shadeT < 0.2) shadeScaler = shadeT / 0.2;
-
-            noStroke();
-            cfg.myColour.setAlpha(255 * random(0.4, 0.8));
-            fill(cfg.myColour);
-            NoisePoint(x1, y1, shadeScaler);
-
-            if (i % 20 == 0) {
-                if (cfg.breakWhenPossible) {
-                    return;
-                }
-                await sleep(1);
-            }
-        }
-    }
-
-    // draw cloud shade
-    let cloudPadding = random(60, 200);
-    let cloudPaddingNX = random(-1000, 1000);
-    let cloudPaddingNScale = 0.03;
-    // let cloudLineSpacing = floor(random(6, 18));
-    let cloudLineSpacing = floor(1.0 / cfg.lineDensity);
-
-    for (let i = 0; i < nowPath.length; i++) {
-        let x1 = nowPath[i].x;
-        let y1 = nowPath[i].y;
-
-        let x2 = x1;
-        let y2 = height - padding;
-
-        if (floor(x1) % cloudLineSpacing != 0) continue;
-
-        if (x1 < padding || x1 > width - padding) continue;
-
-        cloudPaddingNX += cloudPaddingNScale;
-        let paddingNoise = noise(cloudPaddingNX);
-
-        y1 += cloudPadding * paddingNoise;
-        // y1 += random(10, 60);
-
-        if (random() < 0.9) NYNoisyLine(x1, y1, x2, y2);
-
-        if (i % 200 == 0) {
-            if (cfg.breakWhenPossible) {
-                return;
-            }
-
-            await sleep(1);
-        }
-    }
+    paintOneCloud(cloudPaths.at(-1), {
+        padding,
+        alwaysShade: true,
+        skipLineShading: false,
+    });
 }
 async function NYRectOfNYNoisyLines(_x, _y, _width, _height) {
     let xLines = _width * cfg.lineDensity;
