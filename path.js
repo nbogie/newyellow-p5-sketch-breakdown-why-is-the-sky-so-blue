@@ -8,7 +8,7 @@ import { CircleData, getAngle } from "./CircleData.js";
 /**
  *
  * @param {number} padding
- * @param {{showPath:boolean, showCircles:boolean, showCircleWalkPath:boolean, breakWhenPossible:boolean, layerCount:number}} config
+ * @param {{breakWhenPossible:boolean, layerCount:number}} config
  * @returns {Promise<{paths: PointPath[], cloudPaths: PointPath[], debugObjects: { lv1Circles: CircleData[], lv2Circles: CircleData[] }[]} >}
  */
 export async function makeCloudPaths(padding, config) {
@@ -80,7 +80,7 @@ async function makeBaseNoisePaths(config, padding) {
  * @param {PointPath} _pathPoints
  * @param {number} _minSize
  * @param {number} _maxSize
- * @param {{breakWhenPossible:boolean, showPath:boolean}} config
+ * @param {{breakWhenPossible:boolean}} config
  * @returns {Promise<CircleData[]>}
  */
 export async function calculateConstructionCirclesAlongPath(
@@ -201,13 +201,13 @@ export async function calculateConstructionCirclesAlongPath(
  * get the path on the circles
  * @param {CircleData[]} _circles
  * @param {number} _walkSpeed
- * @param {{breakWhenPossible:boolean, showCircleWalkPath: boolean}} config
+ * @param {{breakWhenPossible:boolean}} config
  * @returns {Promise<PointPath>}
  */
 export async function calculateWalkAlongCircles(
     _circles,
     _walkSpeed = 1,
-    { showCircleWalkPath }
+    config
 ) {
     // draw on the edge of circles
     let nowCircleIndex = 0;
@@ -227,14 +227,7 @@ export async function calculateWalkAlongCircles(
     let counter = 0;
 
     while (true) {
-        if (showCircleWalkPath) {
-            fill("white");
-            noStroke();
-            circle(walkX, walkY, 6);
-        }
-
         resultPathData.push({ x: walkX, y: walkY });
-        // NoisePoint(walkX, walkY);
 
         nowWalkingAngle += angleStep;
 
@@ -277,7 +270,12 @@ export async function calculateWalkAlongCircles(
             }
         }
 
-        if (counter++ % 100 == 0) await sleep(1);
+        if (counter++ % 100 == 0) {
+            if (config.breakWhenPossible) {
+                break;
+            }
+            await sleep(1);
+        }
     }
 
     return resultPathData;
